@@ -15,6 +15,7 @@
 //  https://stackoverflow.com/questions/21005942/how-to-save-a-movie-from-avcapture
 //  https://stackoverflow.com/questions/47217998/h264-encoding-and-decoding-using-videotoolbox
 //  https://confluence.doclerholding.com/display/DEVZONE/AVFoundation+framework+on+mac
+//  https://www.youtube.com/watch?v=wPXVeKyUCYw
 
 // Logger Macros
 
@@ -49,10 +50,16 @@
     self = [ super init ];
     if ( self )
     {
-        [ self InitCaptureDevice ];
-        [ self InitCaptureInput ];
-        [ self InitCaptureOutput ];
-        [ self InitCaptureSession ];
+        if ( [ self InitCaptureDevice ])
+        {           
+            [ self InitCaptureInput ];
+            [ self InitCaptureOutput ];
+            [ self InitCaptureSession ];
+        }
+        else
+        {
+            return nil;
+        }
     }
 
     return self;
@@ -75,7 +82,7 @@
     }
 }
 
-- ( void ) InitCaptureDevice
+- ( BOOL ) InitCaptureDevice
 {
     LogFunctionEntry();
 
@@ -88,7 +95,7 @@
     if ( lDeviceCount == 0 )
     {
         LogError("No camera devices available");
-        return;
+        return false;
     }
 
     LogInfo(@"Number of available devices: %d", lDeviceCount )
@@ -115,9 +122,12 @@
     else
     {
         LogError(@"No camera device to be added!");
+        return false;
     }
 
     LogInfo(@"Capture device has been initialized");
+
+    return true;
 }
 
 
@@ -137,10 +147,10 @@
     self.mInput = [AVCaptureDeviceInput deviceInputWithDevice:self.mCamera error:&lError];
     if( self.mInput == nil )
     {
-        LogError(@"Capture input can't be initialized: @");
+        LogError(@"Capture input can't be initialized!");
     }
 
-    LogInfo(@"Capture input has been initialized");
+    LogInfo(@"Capture input has been initialized.");
 }
 
 - ( void ) InitCaptureOutput
