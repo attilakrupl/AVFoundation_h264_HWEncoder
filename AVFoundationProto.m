@@ -2,7 +2,7 @@
 #import <AVKit/AVKit.h>
 #import <Foundation/Foundation.h>
 
-// compile command: clang -framework Foundation -framework AVFoundation AVFoundationProto.m -o codec
+// compile command: clang -framework Foundation -framework AVFoundation AVFoundationProto.m -framework CoreMedia -o codec
 
 // Useful links:
 //  https://stackoverflow.com/questions/30126921/h-264-video-streaming-with-avfoundation-on-os-x
