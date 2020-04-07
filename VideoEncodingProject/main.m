@@ -1,3 +1,12 @@
+//
+//  main.m
+//  VideoEncodingProject
+//
+//  Created by attila.krupl on 2020. 04. 03..
+//  Copyright © 2020. attila.krupl. All rights reserved.
+//
+
+#import <Cocoa/Cocoa.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
 #import <Foundation/Foundation.h>
@@ -16,6 +25,11 @@
 //  https://stackoverflow.com/questions/47217998/h264-encoding-and-decoding-using-videotoolbox
 //  https://confluence.doclerholding.com/display/DEVZONE/AVFoundation+framework+on+mac
 //  https://www.youtube.com/watch?v=wPXVeKyUCYw
+//  https://softron.zendesk.com/hc/en-us/articles/115000013293-Encoding-in-H-264-or-H-265-HEVC-
+//  https://stackoverflow.com/questions/51828494/getting-image-from-avcapturemoviefileoutput-without-switching
+//  https://medium.com/@benwiz/how-to-install-openframeworks-on-a-mac-macos-high-sierra-a5a9b3f47ea1
+//  https://apple.stackexchange.com/questions/63745/does-any-os-x-hardware-contain-on-chip-h-264-encoding-decoding
+//  https://developer.apple.com/documentation/videotoolbox/1428285-vtcompressionsessioncreate?language=objc
 
 // Logger Macros
 
@@ -26,15 +40,19 @@
 
 // Class Interface
 
-@interface AVVideoEncoding : NSObject
+@interface AVVideoEncoding : NSObject <AVCaptureVideoDataOutputSampleBufferDelegate>
 
 @property (nonatomic, strong) AVCaptureSession *mSession;
 @property (nonatomic, strong) AVCaptureDevice  *mCamera;
 @property (nonatomic, strong) AVCaptureInput   *mInput;
-@property (nonatomic, strong) AVCaptureMovieFileOutput  *mOutput;
+@property (nonatomic, strong) AVCaptureVideoDataOutput  *mOutput;
 
 @property (nonatomic, strong) dispatch_queue_t mVideoDataOutputQueue;
 @property (nonatomic, strong) dispatch_queue_t mSessionQueue;
+
+@property (atomic) int mFrameCount;
+
+@property (nullable) NSError *mError;
 
 @end
 
@@ -51,7 +69,7 @@
     if ( self )
     {
         if ( [ self InitCaptureDevice ])
-        {           
+        {
             [ self InitCaptureInput ];
             [ self InitCaptureOutput ];
             [ self InitCaptureSession ];
@@ -71,9 +89,11 @@
 
 - ( void ) GetCaptureDeviceWithType: (NSMutableArray< AVCaptureDevice*>*) aArray deviceType:(AVCaptureDeviceType) aType
 {
-    AVCaptureDeviceDiscoverySession* lCaptureDeviceDiscoverySession = [ AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[ aType ] 
-                                                                        mediaType:AVMediaTypeVideo 
-                                                                        position:AVCaptureDevicePositionBack ];
+    LogFunctionEntry();
+    
+    AVCaptureDeviceDiscoverySession* lCaptureDeviceDiscoverySession = [ AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[ aType ]
+                                                                        mediaType:AVMediaTypeVideo
+                                                                        position:AVCaptureDevicePositionUnspecified ];
     NSArray< AVCaptureDevice*>* lDevices = [ lCaptureDeviceDiscoverySession devices ];
 
     for( AVCaptureDevice* lDevice in lDevices )
@@ -90,7 +110,7 @@
     [ self GetCaptureDeviceWithType: lAllDevices deviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera ];
     [ self GetCaptureDeviceWithType: lAllDevices deviceType:AVCaptureDeviceTypeExternalUnknown ];
 
-    int lDeviceCount = lAllDevices.count;
+    unsigned long lDeviceCount = lAllDevices.count;
     
     if ( lDeviceCount == 0 )
     {
@@ -98,7 +118,7 @@
         return false;
     }
 
-    LogInfo(@"Number of available devices: %d", lDeviceCount )
+    LogInfo(@"Number of available devices: %d", (int)lDeviceCount )
 
     for( AVCaptureDevice* lDevice in lAllDevices )
     {
@@ -108,14 +128,17 @@
         }
     }
 
-    LogInfo("Selecting last camera in list.");
+    unsigned long lCameraNumberToSelect = lDeviceCount;
+    
+    LogInfo("Selecting camera number %d in list.", (int)lCameraNumberToSelect );
 
-    self.mCamera = lAllDevices[lDeviceCount-1];
+    _mCamera = lAllDevices[lCameraNumberToSelect-1];
 
     LogInfo("Camera capabilities are as follows:");
-    [ self GetCaps:self.mCamera ];
-
-    if ( self.mCamera )
+    [ self GetCaps:_mCamera ];
+    [ self ListVideoFormats:_mCamera];
+    
+    if ( _mCamera )
     {
         LogSuccess(@"Camera device added!");
     }
@@ -124,8 +147,6 @@
         LogError(@"No camera device to be added!");
         return false;
     }
-
-    LogInfo(@"Capture device has been initialized");
 
     return true;
 }
@@ -136,16 +157,16 @@
     LogFunctionEntry();
 
     NSError* lError = nil;
-    BOOL lIsDeviceLockedForConfig = [ self.mCamera lockForConfiguration:&lError];
+    BOOL lIsDeviceLockedForConfig = [ _mCamera lockForConfiguration:&lError];
     if ( lIsDeviceLockedForConfig )
     {
         LogInfo(@"Video device is locked for configuration");
         // configure device here
     }
-    [ self.mCamera unlockForConfiguration ];
+    [ _mCamera unlockForConfiguration ];
 
-    self.mInput = [AVCaptureDeviceInput deviceInputWithDevice:self.mCamera error:&lError];
-    if( self.mInput == nil )
+    _mInput = [AVCaptureDeviceInput deviceInputWithDevice:_mCamera error:&lError];
+    if( _mInput == nil )
     {
         LogError(@"Capture input can't be initialized!");
     }
@@ -153,23 +174,86 @@
     LogInfo(@"Capture input has been initialized.");
 }
 
+- (void)SaveCaptureOutputToFile:(CMSampleBufferRef)aSampleBuffer
+{
+    LogFunctionEntry();
+    
+    CVImageBufferRef imageBuffer    = CMSampleBufferGetImageBuffer( aSampleBuffer );
+    CIImage         *ciImage        = [CIImage imageWithCVPixelBuffer:imageBuffer];
+    
+    LogInfo( "Image extent will be h: %f, w: %f, x: %f, y: %f", ciImage.extent.size.height, ciImage.extent.size.width, ciImage.extent.origin.x, ciImage.extent.origin.y );
+    
+    NSString        *lPathComponent = [NSString stringWithFormat:@"file:///Users/attila.krupl/Pictures/Image%d.jpeg", _mFrameCount];
+    
+    LogInfo( "File path will be %@", lPathComponent );
+    
+    NSURL           *lUrl           = [NSURL URLWithString:[lPathComponent stringByAddingPercentEncodingWithAllowedCharacters:[ NSCharacterSet URLQueryAllowedCharacterSet ] ] ];
+    CIContext       *lContext       = [CIContext contextWithOptions:nil];
+    CGColorSpaceRef  lColorSpace    = CGColorSpaceCreateDeviceRGB();
+    NSDictionary    *lOptions       = @{ @"kCGImageDestinationLossyCompressionQuality" : @1.0 , @"depth" : @1, @"disparity" : @1, @"matte" : @1};
+    NSError         *lError         = nil;
+    
+    if ( ![ lContext writeJPEGRepresentationOfImage:ciImage toURL:lUrl colorSpace:lColorSpace options: lOptions error: &lError ] )
+    {
+        if ( lError != nil )
+        {
+            LogError(@"%@", lError.localizedDescription );
+            LogError(@"%@", lError.userInfo );
+        }
+    }
+          
+    CGColorSpaceRelease( lColorSpace );
+}
+
+
+- (void)EncodeCaptureOutputIntoH264:(CMSampleBufferRef)aSampleBuffer
+{
+    LogFunctionEntry();
+}
+
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
+{
+    LogFunctionEntry();
+    
+    if ( captureOutput == _mOutput )
+    {
+        [ self SaveCaptureOutputToFile: sampleBuffer ];
+        [ self EncodeCaptureOutputIntoH264: sampleBuffer ];
+        _mFrameCount += 1;
+    }
+}
+
+
 - ( void ) InitCaptureOutput
 {
     LogFunctionEntry();
 
-    self.mOutput = [ [ AVCaptureMovieFileOutput alloc ] init ];
- 
-    AVCaptureConnection *lConnection = [ self.mOutput connectionWithMediaType:AVMediaTypeVideo ];
+    _mOutput               = [ [ AVCaptureVideoDataOutput alloc ] init ];
+    _mVideoDataOutputQueue = dispatch_queue_create( "video data output queue", DISPATCH_QUEUE_SERIAL );
+    _mFrameCount           = 0;
     
-    [ self.mOutput setOutputSettings:@{ AVVideoCodecKey: AVVideoCodecTypeH264 } forConnection:lConnection ];
-
-    LogInfo( @"Getting output settings..." );
-    NSDictionary<NSString*, id>* lSupportedSettings = [ self.mOutput outputSettingsForConnection:lConnection ];
-    int lDictSize = [ lSupportedSettings count ];
-    LogInfo( @"Number of output settings: %d", lDictSize );
-    for ( id iKey in lSupportedSettings )
+    [ _mOutput setSampleBufferDelegate:self queue:self.mVideoDataOutputQueue];
+    
+    NSArray<AVVideoCodecType> *lAvailableVideoCodecTypes = [ _mOutput availableVideoCodecTypes ];
+    
+    for ( AVVideoCodecType lType in lAvailableVideoCodecTypes )
     {
-        LogInfo( @"Supported setting key: %p", iKey );
+        LogInfo("Available codec type: %@", lType);
+    }
+    
+    AVCaptureConnection *lConnection = [ _mOutput connectionWithMediaType:AVMediaTypeVideo ];
+
+//    [ _mOutput setOutputSettings:@{ AVVideoCodecKey: AVVideoCodecTypeH264 } forConnection:lConnection ];
+
+    if ([ _mSession canAddConnection:lConnection ])
+    {
+        LogSuccess("Adding connection to session.");
+        [ _mSession addConnection:lConnection ];
+    }
+    else
+    {
+        LogError("Cannot add connection to session.");
     }
 
     LogInfo(@"Capture output has been initialized");
@@ -178,54 +262,16 @@
 - ( void ) InitCaptureSession
 {
     LogFunctionEntry();
-    self.mSession = [ [ AVCaptureSession alloc ] init ];
-   
-    [ self.mSession beginConfiguration ];
+    _mSession = [ [ AVCaptureSession alloc ] init ];
+    _mSession.sessionPreset = AVCaptureSessionPresetMedium;
+    
+    [ _mSession beginConfiguration ];
       
     [ self SetupCaptureSession ];
 
-    [ self.mSession commitConfiguration ];
+    [ _mSession commitConfiguration ];
 
     LogInfo(@"Capture session has been initialized");
-}
-
-- (BOOL) CheckForMediaAuthorizationStatus
-{
-    LogFunctionEntry();
-
-    switch ( [ AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo ] )
-    {
-        case AVAuthorizationStatusAuthorized:
-        {
-            LogSuccess(@"Authorization status: Authorized!");
-            return true;
-            break;
-        }
-        case AVAuthorizationStatusNotDetermined:
-        {
-            LogError(@"Authorization status not determined!");
-            [ AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler: ^( BOOL bGranted )
-            {
-                if ( bGranted )
-                {
-                    return;
-                }
-            } ];
-            break;
-        }
-        case AVAuthorizationStatusDenied:
-        {
-            LogError(@"The user previously has denied access!");
-            return false;
-        }
-        case AVAuthorizationStatusRestricted:
-        {
-            LogError(@"The user cannot grant access due to restrictions!");
-            return false;
-        }
-    }
-
-    return false;
 }
 
 
@@ -242,24 +288,22 @@
 {
     LogFunctionEntry();
 
-    self.mSessionQueue = dispatch_queue_create( "session queue", DISPATCH_QUEUE_SERIAL );
-
-    if ( [ self.mSession canAddInput:self.mInput ] )
+    if ( [ _mSession canAddInput:_mInput ] )
     {
         LogInfo("Can add video input");
-        [ self.mSession addInput:self.mInput ];
+        [ _mSession addInput:_mInput ];
     }
 
-    if ([ self.mSession canAddOutput:self.mOutput ] )
+    if ([ _mSession canAddOutput:_mOutput ] )
     {
         LogInfo("Can add video output");
-        [ self.mSession addOutput : self.mOutput ];
+        [ _mSession addOutput : _mOutput ];
     }
 
     NSString* lSessionPreset = AVCaptureSessionPreset640x480;
-    if ( [ self.mSession canSetSessionPreset:lSessionPreset ] )
+    if ( [ _mSession canSetSessionPreset:lSessionPreset ] )
     {
-        [ self.mSession setSessionPreset:lSessionPreset ];
+        [ _mSession setSessionPreset:lSessionPreset ];
     }
 
     [ [ NSNotificationCenter defaultCenter ]
@@ -364,12 +408,15 @@
 - ( void )StartCaptureOnThread
 {
     LogFunctionEntry();
-
-    dispatch_async( self.mSessionQueue
+    
+    _mSessionQueue = dispatch_queue_create( "session queue", DISPATCH_QUEUE_SERIAL );
+    
+    dispatch_async( _mSessionQueue
                   , ^(void)
                     {
                         if ( self.mSession != nil )
                         {
+                            LogInfo("Capture session is starting up.")
                             [ self.mSession startRunning ];
                         }
                     } );
@@ -378,22 +425,10 @@
 @end
 
 
-int main( int argc, char* argv[] )
+int main(int argc, const char * argv[])
 {
     AVVideoEncoding* lVideoEncoding = [ [ AVVideoEncoding alloc ] init ];
-
-    BOOL lIsCaptureAuthorized = [ lVideoEncoding CheckForMediaAuthorizationStatus ];
-
-    if ( lIsCaptureAuthorized )
-    {
-        LogSuccess(@"Capture is authorized, we can setup capture session.");
-        [ lVideoEncoding StartCaptureOnThread ];
-    }
-    else
-    {
-        LogError(@"Capture is not authorized, stopping process.");
-    }
-
-    LogInfo(@"Ended");
-    return 0;
+    [ lVideoEncoding StartCaptureOnThread ];
+  
+    return NSApplicationMain(argc, argv);
 }

@@ -1,0 +1,351 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		270A79D9243725FA0070331C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 270A79D8243725FA0070331C /* AppDelegate.m */; };
+		270A79DB243726000070331C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 270A79DA243726000070331C /* Assets.xcassets */; };
+		270A79DE243726000070331C /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 270A79DC243726000070331C /* MainMenu.xib */; };
+		270A79E1243726000070331C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 270A79E0243726000070331C /* main.m */; };
+		270A79EA243735D60070331C /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 270A79E9243735D60070331C /* AVFoundation.framework */; };
+		270A79EC243736210070331C /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 270A79EB243736210070331C /* AVKit.framework */; };
+		270A79EE2437362C0070331C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 270A79ED2437362C0070331C /* Foundation.framework */; };
+		270A79F0243736460070331C /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 270A79EF243736460070331C /* Cocoa.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		270A79D4243725FA0070331C /* VideoEncodingProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoEncodingProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		270A79D7243725FA0070331C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		270A79D8243725FA0070331C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		270A79DA243726000070331C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		270A79DD243726000070331C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		270A79DF243726000070331C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		270A79E0243726000070331C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		270A79E2243726000070331C /* VideoEncodingProject.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VideoEncodingProject.entitlements; sourceTree = "<group>"; };
+		270A79E9243735D60070331C /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		270A79EB243736210070331C /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
+		270A79ED2437362C0070331C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		270A79EF243736460070331C /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		270A79D1243725FA0070331C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				270A79F0243736460070331C /* Cocoa.framework in Frameworks */,
+				270A79EC243736210070331C /* AVKit.framework in Frameworks */,
+				270A79EE2437362C0070331C /* Foundation.framework in Frameworks */,
+				270A79EA243735D60070331C /* AVFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		270A79CB243725FA0070331C = {
+			isa = PBXGroup;
+			children = (
+				270A79D6243725FA0070331C /* VideoEncodingProject */,
+				270A79D5243725FA0070331C /* Products */,
+				270A79E8243735D60070331C /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		270A79D5243725FA0070331C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				270A79D4243725FA0070331C /* VideoEncodingProject.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		270A79D6243725FA0070331C /* VideoEncodingProject */ = {
+			isa = PBXGroup;
+			children = (
+				270A79D7243725FA0070331C /* AppDelegate.h */,
+				270A79D8243725FA0070331C /* AppDelegate.m */,
+				270A79DA243726000070331C /* Assets.xcassets */,
+				270A79DC243726000070331C /* MainMenu.xib */,
+				270A79DF243726000070331C /* Info.plist */,
+				270A79E0243726000070331C /* main.m */,
+				270A79E2243726000070331C /* VideoEncodingProject.entitlements */,
+			);
+			path = VideoEncodingProject;
+			sourceTree = "<group>";
+		};
+		270A79E8243735D60070331C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				270A79EF243736460070331C /* Cocoa.framework */,
+				270A79ED2437362C0070331C /* Foundation.framework */,
+				270A79EB243736210070331C /* AVKit.framework */,
+				270A79E9243735D60070331C /* AVFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		270A79D3243725FA0070331C /* VideoEncodingProject */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 270A79E5243726010070331C /* Build configuration list for PBXNativeTarget "VideoEncodingProject" */;
+			buildPhases = (
+				270A79D0243725FA0070331C /* Sources */,
+				270A79D1243725FA0070331C /* Frameworks */,
+				270A79D2243725FA0070331C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VideoEncodingProject;
+			productName = VideoEncodingProject;
+			productReference = 270A79D4243725FA0070331C /* VideoEncodingProject.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		270A79CC243725FA0070331C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1110;
+				ORGANIZATIONNAME = attila.krupl;
+				TargetAttributes = {
+					270A79D3243725FA0070331C = {
+						CreatedOnToolsVersion = 11.1;
+					};
+				};
+			};
+			buildConfigurationList = 270A79CF243725FA0070331C /* Build configuration list for PBXProject "VideoEncodingProject" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 270A79CB243725FA0070331C;
+			productRefGroup = 270A79D5243725FA0070331C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				270A79D3243725FA0070331C /* VideoEncodingProject */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		270A79D2243725FA0070331C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				270A79DB243726000070331C /* Assets.xcassets in Resources */,
+				270A79DE243726000070331C /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		270A79D0243725FA0070331C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				270A79E1243726000070331C /* main.m in Sources */,
+				270A79D9243725FA0070331C /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		270A79DC243726000070331C /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				270A79DD243726000070331C /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		270A79E3243726000070331C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		270A79E4243726000070331C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		270A79E6243726010070331C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = VideoEncodingProject/VideoEncodingProject.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = JCW2HB3JHR;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = VideoEncodingProject/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.doclerholding.VideoEncodingProject;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		270A79E7243726010070331C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = VideoEncodingProject/VideoEncodingProject.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = JCW2HB3JHR;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = VideoEncodingProject/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.doclerholding.VideoEncodingProject;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		270A79CF243725FA0070331C /* Build configuration list for PBXProject "VideoEncodingProject" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				270A79E3243726000070331C /* Debug */,
+				270A79E4243726000070331C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		270A79E5243726010070331C /* Build configuration list for PBXNativeTarget "VideoEncodingProject" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				270A79E6243726010070331C /* Debug */,
+				270A79E7243726010070331C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 270A79CC243725FA0070331C /* Project object */;
+}
