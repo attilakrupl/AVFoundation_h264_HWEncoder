@@ -10,10 +10,18 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
 #import <Foundation/Foundation.h>
+#import <VideoToolbox/VideoToolbox.h>
 
-// compile command: clang -framework Foundation -framework AVFoundation AVFoundationProto.m -framework CoreMedia -o codec
 
-// Useful links:
+#pragma mark -
+#pragma mark Compile command
+
+// clang -framework Foundation -framework AVFoundation -framework CoreMedia main.m -o codec
+
+
+#pragma mark -
+#pragma mark Useful links
+
 //  https://stackoverflow.com/questions/30126921/h-264-video-streaming-with-avfoundation-on-os-x
 //  https://github.com/niswegmann/H264Streamer/blob/master/H264Streamer/ViewController.m
 //  https://developer.apple.com/documentation/avfoundation/avcapturephotooutput?language=objc
@@ -30,64 +38,42 @@
 //  https://medium.com/@benwiz/how-to-install-openframeworks-on-a-mac-macos-high-sierra-a5a9b3f47ea1
 //  https://apple.stackexchange.com/questions/63745/does-any-os-x-hardware-contain-on-chip-h-264-encoding-decoding
 //  https://developer.apple.com/documentation/videotoolbox/1428285-vtcompressionsessioncreate?language=objc
+//  https://stackoverflow.com/questions/29525000/how-to-use-videotoolbox-to-decompress-h-264-video-stream
+//  https://developer.apple.com/documentation/videotoolbox/vtcompressionsession/compression_properties?language=objc
 
-// Logger Macros
+
+#pragma mark -
+#pragma mark Logger macros
 
 #define LogError(aMessage, ...) NSLog((@"ERROR:             [Line %d] " aMessage ),     __LINE__, ## __VA_ARGS__);
 #define LogInfo(aMessage, ...) NSLog((@"INFO:              [Line %d] " aMessage ), __LINE__, ## __VA_ARGS__);
 #define LogSuccess(aMessage, ...) NSLog((@"SUCCESS:           [Line %d] " aMessage ), __LINE__, ## __VA_ARGS__);
 #define LogFunctionEntry(aMessage, ...) NSLog((@"Entering function: %s" aMessage ), __PRETTY_FUNCTION__, ## __VA_ARGS__)
 
-// Class Interface
 
-@interface AVVideoEncoding : NSObject <AVCaptureVideoDataOutputSampleBufferDelegate>
+#pragma mark -
+#pragma mark Constant configuration values
 
-@property (nonatomic, strong) AVCaptureSession *mSession;
-@property (nonatomic, strong) AVCaptureDevice  *mCamera;
-@property (nonatomic, strong) AVCaptureInput   *mInput;
-@property (nonatomic, strong) AVCaptureVideoDataOutput  *mOutput;
-
-@property (nonatomic, strong) dispatch_queue_t mVideoDataOutputQueue;
-@property (nonatomic, strong) dispatch_queue_t mSessionQueue;
-
-@property (atomic) int mFrameCount;
-
-@property (nullable) NSError *mError;
-
-@end
-
-// Class Implementation
-
-@implementation AVVideoEncoding
-
-
-- ( instancetype ) init
-{
-    LogFunctionEntry();
-
-    self = [ super init ];
-    if ( self )
-    {
-        if ( [ self InitCaptureDevice ])
-        {
-            [ self InitCaptureInput ];
-            [ self InitCaptureOutput ];
-            [ self InitCaptureSession ];
-        }
-        else
-        {
-            return nil;
-        }
-    }
-
-    return self;
-}
+// AVCaptureSessionPreset const mCaptureSessionPreset = AVCaptureSessionPreset640x480;
+int                    const kRawFrameWidth        = 640;
+int                    const kRawFrameHeight       = 480;
+int                    const kMinCaptureFPS        = 30;
+int                    const kMaxCaptureFPS        = 30;
 
 
 #pragma mark -
-#pragma mark AVFoundation Setup
+#pragma mark Free Helper Functions
 
-- ( void ) GetCaptureDeviceWithType: (NSMutableArray< AVCaptureDevice*>*) aArray deviceType:(AVCaptureDeviceType) aType
+
+#pragma mark ProcessH264Output
+void ProcessH264Output(void* aOutputCallbackRefCon, void* aSourceFrameRefCon, OSStatus aStatus, VTEncodeInfoFlags aInfoFlags, CMSampleBufferRef aSampleBuffer )
+{
+    LogFunctionEntry();
+}
+
+
+#pragma mark GetCaptureDeviceWithType
+void GetCaptureDeviceWithType( NSMutableArray< AVCaptureDevice*>* aArray, AVCaptureDeviceType aType )
 {
     LogFunctionEntry();
     
@@ -102,13 +88,118 @@
     }
 }
 
+
+#pragma mark SaveCaptureOutputToFile
+void SaveCaptureOutputToFile( CMSampleBufferRef aSampleBuffer, int aFrameCount )
+{
+    LogFunctionEntry();
+    
+    CVImageBufferRef imageBuffer    = CMSampleBufferGetImageBuffer( aSampleBuffer );
+    CIImage         *ciImage        = [CIImage imageWithCVPixelBuffer:imageBuffer];
+    
+    LogInfo( "Image extent will be h: %f, w: %f, x: %f, y: %f", ciImage.extent.size.height, ciImage.extent.size.width, ciImage.extent.origin.x, ciImage.extent.origin.y );
+    
+    NSString        *lPathComponent = [NSString stringWithFormat:@"file:///Users/attila.krupl/Pictures/Image%d.jpeg", aFrameCount];
+    
+    LogInfo( "File path will be %@", lPathComponent );
+    
+    NSURL           *lUrl           = [NSURL URLWithString:[lPathComponent stringByAddingPercentEncodingWithAllowedCharacters:[ NSCharacterSet URLQueryAllowedCharacterSet ] ] ];
+    CIContext       *lContext       = [CIContext contextWithOptions:nil];
+    CGColorSpaceRef  lColorSpace    = CGColorSpaceCreateDeviceRGB();
+    NSDictionary    *lOptions       = @{ @"kCGImageDestinationLossyCompressionQuality" : @1.0 , @"depth" : @1, @"disparity" : @1, @"matte" : @1};
+    NSError         *lError         = nil;
+    
+    if ( ![ lContext writeJPEGRepresentationOfImage:ciImage toURL:lUrl colorSpace:lColorSpace options: lOptions error: &lError ] )
+    {
+        if ( lError != nil )
+        {
+            LogError(@"%@", lError.localizedDescription );
+            LogError(@"%@", lError.userInfo );
+        }
+    }
+          
+    CGColorSpaceRelease( lColorSpace );
+}
+
+
+#pragma mark EncodeCaptureOutputIntoH264
+void EncodeCaptureOutputIntoH264( CMSampleBufferRef aSampleBuffer, VTCompressionSessionRef aCompressionSession )
+{
+    LogFunctionEntry();
+    
+    CVImageBufferRef lImageBuffer           = CMSampleBufferGetImageBuffer( aSampleBuffer );
+    CMTime           lPresentationTimestamp = CMSampleBufferGetOutputPresentationTimeStamp( aSampleBuffer );
+    VTCompressionSessionEncodeFrame( aCompressionSession
+                                   , lImageBuffer
+                                   , lPresentationTimestamp
+                                   , kCMTimeInvalid
+                                   , NULL
+                                   , NULL
+                                   , NULL );
+}
+
+
+#pragma mark -
+#pragma mark AVVideoEncoding class
+
+@interface AVVideoEncoding : NSObject <AVCaptureVideoDataOutputSampleBufferDelegate>
+
+@property (nonatomic, strong) AVCaptureSession         *mSession;
+@property (nonatomic, strong) AVCaptureDevice          *mCamera;
+@property (nonatomic, strong) AVCaptureInput           *mInput;
+@property (nonatomic, strong) AVCaptureVideoDataOutput *mOutput;
+@property (nonatomic, assign) VTCompressionSessionRef  mCompressionSession;
+
+@property (nonatomic, strong) dispatch_queue_t mVideoDataOutputQueue;
+@property (nonatomic, strong) dispatch_queue_t mSessionQueue;
+
+@property (atomic) int mFrameCount;
+
+@end
+
+// Class Implementation
+
+@implementation AVVideoEncoding
+
+
+#pragma mark -
+#pragma mark Initializer functions
+
+
+#pragma mark init
+- ( instancetype ) init
+{
+    LogFunctionEntry();
+
+    self = [ super init ];
+    if ( self )
+    {
+        if ( [ self InitCaptureDevice ])
+        {
+            [ self InitCaptureInput ];
+            [ self InitCaptureOutput ];
+            [ self InitCaptureSession ];
+            [ self InitH264CompressionSession ];
+        }
+        else
+        {
+            return nil;
+        }
+    }
+
+    return self;
+}
+
+
+#pragma mark InitCaptureDevice
+
 - ( BOOL ) InitCaptureDevice
 {
     LogFunctionEntry();
 
     NSMutableArray< AVCaptureDevice*>* lAllDevices = [[NSMutableArray alloc ] init ];
-    [ self GetCaptureDeviceWithType: lAllDevices deviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera ];
-    [ self GetCaptureDeviceWithType: lAllDevices deviceType:AVCaptureDeviceTypeExternalUnknown ];
+    GetCaptureDeviceWithType( lAllDevices, AVCaptureDeviceTypeBuiltInWideAngleCamera );
+    GetCaptureDeviceWithType( lAllDevices, AVCaptureDeviceTypeExternalUnknown );
 
     unsigned long lDeviceCount = lAllDevices.count;
     
@@ -152,6 +243,7 @@
 }
 
 
+#pragma mark InitCaptureInput
 - ( void ) InitCaptureInput
 {
     LogFunctionEntry();
@@ -174,57 +266,8 @@
     LogInfo(@"Capture input has been initialized.");
 }
 
-- (void)SaveCaptureOutputToFile:(CMSampleBufferRef)aSampleBuffer
-{
-    LogFunctionEntry();
-    
-    CVImageBufferRef imageBuffer    = CMSampleBufferGetImageBuffer( aSampleBuffer );
-    CIImage         *ciImage        = [CIImage imageWithCVPixelBuffer:imageBuffer];
-    
-    LogInfo( "Image extent will be h: %f, w: %f, x: %f, y: %f", ciImage.extent.size.height, ciImage.extent.size.width, ciImage.extent.origin.x, ciImage.extent.origin.y );
-    
-    NSString        *lPathComponent = [NSString stringWithFormat:@"file:///Users/attila.krupl/Pictures/Image%d.jpeg", _mFrameCount];
-    
-    LogInfo( "File path will be %@", lPathComponent );
-    
-    NSURL           *lUrl           = [NSURL URLWithString:[lPathComponent stringByAddingPercentEncodingWithAllowedCharacters:[ NSCharacterSet URLQueryAllowedCharacterSet ] ] ];
-    CIContext       *lContext       = [CIContext contextWithOptions:nil];
-    CGColorSpaceRef  lColorSpace    = CGColorSpaceCreateDeviceRGB();
-    NSDictionary    *lOptions       = @{ @"kCGImageDestinationLossyCompressionQuality" : @1.0 , @"depth" : @1, @"disparity" : @1, @"matte" : @1};
-    NSError         *lError         = nil;
-    
-    if ( ![ lContext writeJPEGRepresentationOfImage:ciImage toURL:lUrl colorSpace:lColorSpace options: lOptions error: &lError ] )
-    {
-        if ( lError != nil )
-        {
-            LogError(@"%@", lError.localizedDescription );
-            LogError(@"%@", lError.userInfo );
-        }
-    }
-          
-    CGColorSpaceRelease( lColorSpace );
-}
 
-
-- (void)EncodeCaptureOutputIntoH264:(CMSampleBufferRef)aSampleBuffer
-{
-    LogFunctionEntry();
-}
-
-
-- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
-{
-    LogFunctionEntry();
-    
-    if ( captureOutput == _mOutput )
-    {
-        [ self SaveCaptureOutputToFile: sampleBuffer ];
-        [ self EncodeCaptureOutputIntoH264: sampleBuffer ];
-        _mFrameCount += 1;
-    }
-}
-
-
+#pragma mark InitCaptureOutput
 - ( void ) InitCaptureOutput
 {
     LogFunctionEntry();
@@ -244,8 +287,16 @@
     
     AVCaptureConnection *lConnection = [ _mOutput connectionWithMediaType:AVMediaTypeVideo ];
 
-//    [ _mOutput setOutputSettings:@{ AVVideoCodecKey: AVVideoCodecTypeH264 } forConnection:lConnection ];
-
+    if (lConnection.isVideoMinFrameDurationSupported)
+    {
+        lConnection.videoMinFrameDuration = CMTimeMake(1, kMinCaptureFPS);
+    }
+        
+    if (lConnection.isVideoMaxFrameDurationSupported)
+    {
+        lConnection.videoMaxFrameDuration = CMTimeMake(1, kMaxCaptureFPS);
+    }
+    
     if ([ _mSession canAddConnection:lConnection ])
     {
         LogSuccess("Adding connection to session.");
@@ -259,11 +310,13 @@
     LogInfo(@"Capture output has been initialized");
 }
 
+
+#pragma mark InitCaptureSession
 - ( void ) InitCaptureSession
 {
     LogFunctionEntry();
     _mSession = [ [ AVCaptureSession alloc ] init ];
-    _mSession.sessionPreset = AVCaptureSessionPresetMedium;
+    _mSession.sessionPreset = AVCaptureSessionPreset640x480;
     
     [ _mSession beginConfiguration ];
       
@@ -275,6 +328,60 @@
 }
 
 
+#pragma mark InitH264CompressionSession
+- (void) InitH264CompressionSession
+{
+    LogFunctionEntry();
+    
+    _mCompressionSession = nil;
+    
+    //https://developer.apple.com/documentation/videotoolbox/vtcompressionsession/compression_properties?language=objc
+    
+    CFDictionaryRef lEncoderSpecification = (__bridge CFDictionaryRef)@{ @"kVTVideoEncoderSpecification_RequireHardwareAcceleratedVideoEncoder" : @true
+                                                                       , @"kVTCompressionPropertyKey_AverageBitRate" : @2000000
+                                                                       , @"kVTCompressionPropertyKey_MaxH264SliceBytes" : @0
+                                                                       , @"kVTCompressionPropertyKey_ProfileLevel":@"kVTProfileLevel_H264_Main_AutoLevel"
+                                                                       , @"kVTCompressionPropertyKey_RealTime": @true };
+    
+    OSStatus lOSStatus = VTCompressionSessionCreate( nil
+                                                   , kRawFrameWidth
+                                                   , kRawFrameHeight
+                                                   , kCMVideoCodecType_H264
+                                                   , lEncoderSpecification
+                                                   , nil
+                                                   , kCFAllocatorDefault
+                                                   , &ProcessH264Output
+                                                   , nil
+                                                   , &_mCompressionSession );
+    
+    if ( lOSStatus == noErr )
+    {
+        LogSuccess("Compression session has been created successfully!");
+    }
+    else
+    {
+        LogError("Couldn't create compression session!");
+    }
+}
+
+
+#pragma mark -
+#pragma mark captureOutput
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
+{
+    LogFunctionEntry();
+    
+    if ( captureOutput == _mOutput )
+    {
+        // SaveCaptureOutputToFile( sampleBuffer, _mFrameCount );
+        EncodeCaptureOutputIntoH264( sampleBuffer, _mCompressionSession );
+        
+        _mFrameCount += 1;
+    }
+}
+
+
+#pragma mark IsErrorSession
 - (void) IsErrorSession: (NSNotification *) notification
 {
     LogFunctionEntry();
@@ -284,6 +391,7 @@
 }
 
 
+#pragma mark SetupCaptureSession
 - (void) SetupCaptureSession
 {
     LogFunctionEntry();
@@ -314,7 +422,7 @@
     ];
 }
 
-
+#pragma mark GetCaps
 -(void) GetCaps:(AVCaptureDevice*)aDevice
 {
     LogFunctionEntry();
@@ -331,6 +439,7 @@
 }
  
 
+#pragma mark GetVideoCaps
 -(void) GetVideoCaps:(AVCaptureDevice*)aDevice
 {
     LogFunctionEntry();
@@ -364,6 +473,7 @@
 }
  
 
+#pragma mark ListVideoFormats
 -(void) ListVideoFormats:(AVCaptureDevice*)aDevice
 {
     LogFunctionEntry();
@@ -405,6 +515,8 @@
     }
 }
 
+
+#pragma mark StartCaptureOnThread
 - ( void )StartCaptureOnThread
 {
     LogFunctionEntry();
@@ -425,6 +537,8 @@
 @end
 
 
+#pragma mark -
+#pragma mark main
 int main(int argc, const char * argv[])
 {
     AVVideoEncoding* lVideoEncoding = [ [ AVVideoEncoding alloc ] init ];

@@ -15,6 +15,7 @@
 		270A79EC243736210070331C /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 270A79EB243736210070331C /* AVKit.framework */; };
 		270A79EE2437362C0070331C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 270A79ED2437362C0070331C /* Foundation.framework */; };
 		270A79F0243736460070331C /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 270A79EF243736460070331C /* Cocoa.framework */; };
+		27186A59243D72B7007D58F3 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27186A58243D72B7007D58F3 /* VideoToolbox.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		270A79EB243736210070331C /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		270A79ED2437362C0070331C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		270A79EF243736460070331C /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		27186A58243D72B7007D58F3 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27186A59243D72B7007D58F3 /* VideoToolbox.framework in Frameworks */,
 				270A79F0243736460070331C /* Cocoa.framework in Frameworks */,
 				270A79EC243736210070331C /* AVKit.framework in Frameworks */,
 				270A79EE2437362C0070331C /* Foundation.framework in Frameworks */,
@@ -81,6 +84,7 @@
 		270A79E8243735D60070331C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				27186A58243D72B7007D58F3 /* VideoToolbox.framework */,
 				270A79EF243736460070331C /* Cocoa.framework */,
 				270A79ED2437362C0070331C /* Foundation.framework */,
 				270A79EB243736210070331C /* AVKit.framework */,
